@@ -92,14 +92,6 @@ The **Academic Records Management System (ARMS)** offers:
 1. **Pluggable Database Creation**  
     ![Pluggable Database](plugable.jpg)
 
-   ```sql
-CREATE PLUGGABLE DATABASE Wed_Peacock_AcademicRecordsManagementSystem
-ADMIN USER wed_peacock IDENTIFIED BY peacock
-FILE_NAME_CONVERT = (
-    'C:\ORACLE\ORADATA\ORCL\PDBSEED\', 
-    'C:\ORACLE\ORADATA\ORCL\Wed_Peacock_AcademicRecordsManagementSystem\');
-```
-
 2. **Oracle Enterprise Manager**  
    ![OEM](OEM.jpg)  
 
