@@ -89,7 +89,7 @@ The **Academic Records Management System (ARMS)** offers:
    ![BPMN Diagram](bpmn.png)  
 ## PHASE 4
 ### Database Setup
-1. **Pluggable Database Creation**  
+1. **Pluggable Database**  
     ![Pluggable Database](plugable.jpg)
 
 2. **Oracle Enterprise Manager**  
