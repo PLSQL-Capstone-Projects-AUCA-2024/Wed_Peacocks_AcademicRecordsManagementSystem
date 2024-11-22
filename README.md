@@ -90,16 +90,15 @@ The **Academic Records Management System (ARMS)** offers:
 ## PHASE 4
 ### Database Setup
 1. **Pluggable Database Creation**  
+    ![Pluggable Database](plugable.jpg)
 
-```sql
+   ```sql
 CREATE PLUGGABLE DATABASE Wed_Peacock_AcademicRecordsManagementSystem
 ADMIN USER wed_peacock IDENTIFIED BY peacock
 FILE_NAME_CONVERT = (
     'C:\ORACLE\ORADATA\ORCL\PDBSEED\', 
     'C:\ORACLE\ORADATA\ORCL\Wed_Peacock_AcademicRecordsManagementSystem\');
 ```
-
-    ![Pluggable Database](plugable.jpg)  
 
 2. **Oracle Enterprise Manager**  
    ![OEM](OEM.jpg)  
