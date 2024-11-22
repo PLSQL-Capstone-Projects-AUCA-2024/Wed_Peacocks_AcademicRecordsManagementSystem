@@ -87,7 +87,7 @@ The **Academic Records Management System (ARMS)** offers:
 
 3. **BPMN Diagram**  
    ![BPMN Diagram](bpmn.png)  
-
+## PHASE 4
 ### Database Setup
 1. **Pluggable Database**  
    ![Pluggable Database](plugable.jpg)  
@@ -96,7 +96,7 @@ The **Academic Records Management System (ARMS)** offers:
    ![OEM](OEM.jpg)  
 
 ---
-
+## PHASE 5 & 6
 ## SQL Queries
 
 ### Create Tables
