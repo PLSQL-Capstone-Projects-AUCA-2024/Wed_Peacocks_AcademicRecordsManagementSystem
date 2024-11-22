@@ -99,7 +99,8 @@ The **Academic Records Management System (ARMS)** offers:
 ## PHASE 5 & 6
 ## SQL Queries
 
-### Create Tables
+### Creating Tables
+
 ```sql
 -- Create Students table
 CREATE TABLE Students (
@@ -149,7 +150,10 @@ CREATE TABLE Grades (
     FOREIGN KEY (course_id) REFERENCES Courses(course_id) ON DELETE CASCADE,
     UNIQUE (student_id, course_id, term)
 );
+```
+### Inserting data into tables
 
+```sql
 
 -- Insert students using subqueries from another table or calculated values
 INSERT INTO Students (student_id, name, contact_info, enrollment_status, enrollment_date)
@@ -167,6 +171,7 @@ SELECT
 UNION ALL
 SELECT 
     5, 'Ethan Wright', 'ethan@example.com', 'Inactive', '2022-03-01';
+
 -- Insert courses using UNION to add multiple rows
 INSERT INTO Courses (course_id, title, credit_hours, prerequisites)
 SELECT 
@@ -183,6 +188,7 @@ SELECT
 UNION ALL
 SELECT 
     5, 'Computer Networks', 3, 'Operating Systems';
+
 -- Inserting multiple records separately for better readability
 INSERT INTO Enrollments (enrollment_id, student_id, course_id, enrollment_date, term)
 VALUES (1, 1, 1, '2022-08-15', 'Fall 2022');
@@ -199,6 +205,9 @@ VALUES (4, 4, 4, '2023-01-10', 'Spring 2023');
 INSERT INTO Enrollments (enrollment_id, student_id, course_id, enrollment_date, term)
 VALUES (5, 5, 5, '2022-03-01', 'Summer 2022');
 -- Omitting the `comments` field if it allows NULL (assuming the column allows it to be null)
+
+-- Inserting records into Grades table
+
 INSERT INTO Grades (grade_id, student_id, course_id, grade, term)
 VALUES 
     (1, 1, 1, 'A', 'Fall 2022'),
@@ -206,6 +215,9 @@ VALUES
     (3, 3, 3, 'A', 'Fall 2019'),
     (4, 4, 4, 'C', 'Spring 2023'),
     (5, 5, 5, 'B', 'Summer 2022');
+
+-- Inserting records into Courses_Instructors table
+
 INSERT INTO Courses_Instructors (course_instructor_id, course_id, instructor_id)
 VALUES (1, 1, 1);
 
@@ -220,6 +232,9 @@ VALUES (4, 4, 4);
 
 INSERT INTO Courses_Instructors (course_instructor_id, course_id, instructor_id)
 VALUES (5, 5, 5);
+
+-- Inserting records into Department table
+
 -- Insert record for Computer Science Department
 INSERT INTO Department (department_id, department_name)
 VALUES (1, 'Computer Science');
@@ -239,9 +254,10 @@ VALUES (4, 'Physics');
 -- Insert record for Literature Department
 INSERT INTO Department (department_id, department_name)
 VALUES (5, 'Literature');
+```
+### Deleting data from tables
 
-
-
+```sql
 
 -- Remove a student record
 DELETE FROM Students
@@ -250,20 +266,27 @@ WHERE student_id = 5;
 -- Remove a course record
 DELETE FROM Courses
 WHERE course_id = 5;
+
 -- Delete an enrollment record
 DELETE FROM Enrollments
 WHERE enrollment_id = 3;
+
 -- Delete a grade record
 DELETE FROM Grades
 WHERE grade_id = 4;
+
 -- Remove a course-instructor relationship
 DELETE FROM Courses_Instructors
 WHERE course_instructor_id = 2;
+
 -- Remove a department
 DELETE FROM Department
 WHERE department_id = 5;
+```
 
+### Updating records into tables
 
+```sql
 
 -- Update contact information for a student
 UPDATE Students
@@ -274,6 +297,7 @@ WHERE student_id = 1;
 UPDATE Students
 SET enrollment_status = 'Inactive'
 WHERE student_id = 5;
+
 -- Update credit hours for a course
 UPDATE Courses
 SET credit_hours = 4
@@ -283,6 +307,7 @@ WHERE course_id = 4;
 UPDATE Courses
 SET title = 'Advanced Operating Systems'
 WHERE course_id = 4;
+
 -- Update the term for a specific enrollment
 UPDATE Enrollments
 SET term = 'Winter 2023'
@@ -292,6 +317,7 @@ WHERE enrollment_id = 4;
 UPDATE Enrollments
 SET course_id = 3
 WHERE enrollment_id = 5;
+
 -- Update a student's grade
 UPDATE Grades
 SET grade = 'A+'
@@ -321,7 +347,12 @@ WHERE department_id = 5;
 UPDATE Department
 SET department_name = 'Computer and Information Science'
 WHERE department_id = 1;
+```
 
+### Displaying records from different tables
+
+```sql
+-- Cross Join
 SELECT 
     Students.name AS student_name,
     Courses.title AS course_title
@@ -329,6 +360,7 @@ FROM
     Students
 CROSS JOIN Courses;
 
+-- Inner Join
 SELECT 
     Students.name AS student_name,
     Courses.title AS course_title
@@ -337,6 +369,7 @@ FROM
 INNER JOIN Students ON Enrollments.student_id = Students.student_id
 INNER JOIN Courses ON Enrollments.course_id = Courses.course_id;
 
+-- Left Join
 SELECT 
     Students.name AS student_name,
     Enrollments.course_id AS enrolled_course_id
@@ -344,6 +377,7 @@ FROM
     Students
 LEFT OUTER JOIN Enrollments ON Students.student_id = Enrollments.student_id;
 
+-- Right Join
 SELECT 
     Courses.title AS course_title,
     Enrollments.student_id AS student_enrolled
