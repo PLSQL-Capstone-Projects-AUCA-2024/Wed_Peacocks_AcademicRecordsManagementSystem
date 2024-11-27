@@ -67,7 +67,7 @@ The **Academic Records Management System (ARMS)** offers:
 - **Focus**: Design a logical database model with entities, relationships, and constraints.
 
 **Deliverables**:
-- `PHASE 3.docx`: Comprehensive database model.
+- `PHASE 3.docx`: Comprehensive database models.
 - `FLOW_DIAGRAM.PNG`: Visualization of data structure.
 
 ---
