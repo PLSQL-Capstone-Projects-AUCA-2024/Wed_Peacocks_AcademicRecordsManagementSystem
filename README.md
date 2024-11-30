@@ -155,7 +155,7 @@ CREATE TABLE Grades (
 
 ```sql
 
--- Insert students using subqueries from another table or calculated values
+-- Insert students using subqueries from another table 
 INSERT INTO Students (student_id, name, contact_info, enrollment_status, enrollment_date)
 SELECT 
     1, 'Alice Johnson', 'alice@example.com', 'Active', '2022-08-15'
