@@ -1,0 +1,250 @@
+A. PROBLEM STATEMENT 
+The Academic Records Management System (ARMS) requires advanced database programming techniques to ensure seamless management of sensitive academic data, such as student records, grades, and course enrollments. The implementation of triggers, cursors, functions, packages, and auditing mechanisms is essential to maintain data integrity, enforce institutional rules, automate academic workflows, and enhance security. These techniques address the challenges of managing academic records efficiently and securely while adhering to university policies.
+
+Justification 
+Triggers:
+>Enforce institutional policies, such as ensuring valid grade entries (A, B, C, D, F) when updating the Grades table.
+>Automate the update of enrollment status when a student completes all courses in their program.
+Cursors:
+>Process student performance data row by row to generate progress reports, such as identifying students who are at risk based on GPA.
+>Audit grade changes to ensure accountability when grades are updated.
+Functions:
+>Calculate student GPA dynamically based on grades recorded in the Grades table.
+>Determine the total number of credits a student has completed to check eligibility for graduation.
+Packages:
+>Organize procedures for adding, updating, and querying student records into a single, modular package for better maintainability.
+>Group functions for GPA calculation and credit tracking into a package to ensure consistency and reusability.
+Auditing:
+>Log all updates or deletions of sensitive records in the Students and Grades tables to maintain a clear record of user actions.
+>Implement access restrictions to allow only authorized personnel to update or delete records, ensuring compliance with university regulations.
+
+B. TRIGGER IMPLEMENTATION 
+1.Simple Triggers:
+
+BEFORE INSERT Trigger: Ensure valid enrollment status (Active, Inactive, or Graduated) during record insertion into the Students table.
+AFTER UPDATE Trigger: Automatically update the term in Enrollments table when the Courses table’s title is updated.
+
+CREATE OR REPLACE TRIGGER check_enrollment_status
+BEFORE INSERT ON Students
+FOR EACH ROW
+BEGIN
+    IF :NEW.enrollment_status NOT IN ('Active', 'Inactive', 'Graduated') THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Invalid enrollment status!');
+    END IF;
+END;
+/
+2.Compound Trigger:
+Handle multi-row operations in the Grades table to log changes.
+
+CREATE OR REPLACE TRIGGER log_grade_changes
+FOR INSERT OR UPDATE OR DELETE ON Grades
+COMPOUND TRIGGER
+    TYPE GradeChangeRec IS RECORD (student_id INT, course_id INT, old_grade CHAR(2), new_grade CHAR(2));
+    GradeChangeLog SYS.ODCIVARCHAR2LIST := SYS.ODCIVARCHAR2LIST();
+
+    BEFORE EACH ROW IS
+    BEGIN
+        GradeChangeLog.EXTEND;
+        GradeChangeLog(GradeChangeLog.COUNT) := 
+            'Change: ' || :OLD.student_id || ', ' || :OLD.course_id || 
+            ' from ' || NVL(:OLD.grade, 'NULL') || ' to ' || NVL(:NEW.grade, 'NULL');
+    END BEFORE EACH ROW;
+
+    AFTER STATEMENT IS
+    BEGIN
+        FOR i IN 1..GradeChangeLog.COUNT LOOP
+            DBMS_OUTPUT.PUT_LINE(GradeChangeLog(i));
+        END LOOP;
+    END AFTER STATEMENT;
+END log_grade_changes;
+/
+C. CURSOR USAGE
+1.Scenario: Generate a report of students who are enrolled in a specific term.
+2.Implementation:
+
+DECLARE
+    CURSOR student_cursor IS
+        SELECT student_id, name FROM Students s
+        JOIN Enrollments e ON s.student_id = e.student_id
+        WHERE e.term = 'Fall 2022';
+    student_record student_cursor%ROWTYPE;
+BEGIN
+    OPEN student_cursor;
+    LOOP
+        FETCH student_cursor INTO student_record;
+        EXIT WHEN student_cursor%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE('Student: ' || student_record.name || ' (ID: ' || student_record.student_id || ')');
+    END LOOP;
+    CLOSE student_cursor;
+END;
+/
+D.ATTRIBUTES AND FUNCTIONS
+1.Attributes: %ROWTYPE to fetch all columns for a student.
+
+DECLARE
+    student_record Students%ROWTYPE;
+BEGIN
+    SELECT * INTO student_record FROM Students WHERE student_id = 1;
+    DBMS_OUTPUT.PUT_LINE('Student Name: ' || student_record.name);
+END;
+/
+
+2.Functions: Calculate the average grade for a course.
+
+CREATE OR REPLACE FUNCTION calculate_average_grade (course_id_in INT)
+RETURN NUMBER IS
+    avg_grade NUMBER;
+BEGIN
+    SELECT AVG(CASE grade 
+               WHEN 'A' THEN 4 
+               WHEN 'B' THEN 3 
+               WHEN 'C' THEN 2 
+               WHEN 'D' THEN 1 
+               ELSE 0 END)
+    INTO avg_grade
+    FROM Grades
+    WHERE course_id = course_id_in;
+    RETURN avg_grade;
+END;
+/
+
+E. PACKAGE DEVELOPMENT
+
+1.Package Specification:
+
+CREATE OR REPLACE PACKAGE academic_utils IS
+    PROCEDURE log_student_activity(student_id_in INT);
+    FUNCTION calculate_gpa(student_id_in INT) RETURN NUMBER;
+END academic_utils;
+/
+2.Package Body:
+
+CREATE OR REPLACE PACKAGE BODY academic_utils IS
+    PROCEDURE log_student_activity(student_id_in INT) IS
+    BEGIN
+        INSERT INTO ActivityLog (student_id, action_date, action_desc)
+        VALUES (student_id_in, SYSDATE, 'Student accessed records');
+    END log_student_activity;
+
+    FUNCTION calculate_gpa(student_id_in INT) RETURN NUMBER IS
+        gpa NUMBER;
+    BEGIN
+        SELECT AVG(CASE grade 
+                   WHEN 'A' THEN 4 
+                   WHEN 'B' THEN 3 
+                   WHEN 'C' THEN 2 
+                   WHEN 'D' THEN 1 
+                   ELSE 0 END)
+        INTO gpa
+        FROM Grades
+        WHERE student_id = student_id_in;
+        RETURN gpa;
+    END calculate_gpa;
+END academic_utils;
+/
+
+F. AUDITING WITH RESTRICTIONS AND TRACKING
+1.Implementation: Track changes to the Students table.
+
+CREATE OR REPLACE TRIGGER audit_students_changes
+AFTER UPDATE OR DELETE ON Students
+FOR EACH ROW
+BEGIN
+    INSERT INTO AuditLog (action, student_id, change_date)
+    VALUES (CASE 
+               WHEN DELETING THEN 'DELETE'
+               ELSE 'UPDATE' 
+            END, :OLD.student_id, SYSDATE);
+END;
+/
+
+2.Restrictions: Use roles to restrict access.
+
+GRANT SELECT, INSERT ON Students TO read_write_role;
+REVOKE DELETE ON Students FROM read_write_role;
+
+g) Scope and Limitations
+Scope:
+
+Triggers enforce business rules and maintain consistency.
+Cursors process complex operations row by row.
+Functions and packages improve reusability and modularity.
+Auditing enhances security by tracking changes.
+
+Limitations:
+
+Triggers can introduce performance overhead during bulk operations.
+Cursors are less efficient compared to set-based operations.
+Complex auditing may require additional storage and processing.
+
+Documentation and Demonstration for Academic Records Management System (ARMS)
+Report
+
+1. Problem Statement and Rationale
+The Academic Records Management System (ARMS) handles sensitive student data, requiring advanced database programming techniques to ensure accurate, secure, and efficient operations. To meet these requirements:
+
+Triggers: Enforce business rules, such as ensuring valid enrollment statuses and data consistency.
+Cursors: Allow row-by-row operations, such as processing audit logs for database changes.
+Functions: Encapsulate logic for tasks like GPA calculation, enhancing code modularity.
+Packages: Organize related procedures and functions for better maintainability and reusability.
+Auditing: Track and restrict changes to sensitive data, ensuring transparency and accountability.
+
+2. Implementation Details
+a) Triggers
+Purpose: Automatically enforce business rules and maintain data integrity when specific database actions occur.
+Use Cases:
+Validating enrollment status during data insertion or updates.
+Ensuring grades entered are within a valid range.
+Logging actions in the audit table after data changes.
+b) Cursors
+Purpose: Handle row-by-row processing for tasks requiring detailed attention to individual database records.
+Use Cases:
+Iterating through grade records to generate audit entries.
+Processing student course enrollments for custom reporting.
+c) Functions
+Purpose: Provide modular, reusable logic for tasks that require specific calculations or operations.
+Use Cases:
+Calculating a student’s GPA based on grades and credit hours.
+Determining the number of credit hours a student has completed.
+d) Packages
+Purpose: Group related procedures, functions, and variables into a single unit for better code organization and security.
+Use Cases:
+Managing student-related operations such as adding a student or retrieving their status.
+Creating a central package for all auditing operations to ensure consistency.
+e) Auditing
+Purpose: Monitor and log database activities, ensuring accountability and compliance with security standards.
+Use Cases:
+Tracking changes to sensitive fields like grades or enrollment status.
+Logging user actions for later review and accountability.
+Restricting data access based on user roles.
+
+Demonstration
+1. Triggers in Action
+Demonstrate how inserting or updating a student with invalid enrollment status is prevented.
+Show triggers that log changes to grades or student details into the audit table.
+2. Row-by-Row Cursor Processing
+Illustrate how cursors are used to process audit entries for each grade change, generating detailed logs.
+3. Modular Functions
+Demonstrate a function that calculates GPA for a selected student, showcasing accuracy and modularity.
+4. Package Usage
+Highlight the use of packages to streamline operations, such as adding new students or managing course enrollments.
+5. Audit Logs
+Show audit logs capturing actions like grade changes or sensitive data updates.
+Demonstrate how role-based restrictions ensure only authorized users can modify specific records.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
