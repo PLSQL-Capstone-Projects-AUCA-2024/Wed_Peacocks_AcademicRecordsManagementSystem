@@ -385,3 +385,29 @@ FROM
     Courses
 RIGHT OUTER JOIN Enrollments ON Courses.course_id = Enrollments.course_id;
 ```
+# PHASE 7 
+The **Academic Records Management System (ARMS)** is a database solution designed to manage academic data efficiently and securely. It incorporates advanced database programming techniques like triggers, cursors, functions, packages, and auditing mechanisms to automate workflows, enforce institutional rules, and ensure data security.
+
+## Features
+
+1. **Triggers**: Enforce business rules and automate tasks.
+2. **Cursors**: Process data row-by-row for detailed operations.
+3. **Functions**: Encapsulate logic for modular, reusable calculations.
+4. **Packages**: Organize related database operations for maintainability.
+5. **Auditing**: Track database changes for accountability.
+   
+          ### Trigers
+   **Purpose:** Automate data validation and enforce business rules.
+
+#### Example: Validate Enrollment Status
+
+```sql
+CREATE OR REPLACE TRIGGER check_enrollment_status
+BEFORE INSERT ON Students
+FOR EACH ROW
+BEGIN
+    IF :NEW.enrollment_status NOT IN ('Active', 'Inactive', 'Graduated') THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Invalid enrollment status!');
+    END IF;
+END;
+/
