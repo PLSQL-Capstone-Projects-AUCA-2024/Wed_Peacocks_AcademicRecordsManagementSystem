@@ -396,7 +396,7 @@ The **Academic Records Management System (ARMS)** is a database solution designe
 4. **Packages**: Organize related database operations for maintainability.
 5. **Auditing**: Track database changes for accountability.
    
-    ### Trigers
+    ### Triggers
    **Purpose:** Automate data validation and enforce business rules.
 
 #### Example: Validate Enrollment Status
@@ -475,6 +475,26 @@ BEGIN
 END;
 /
 ```
+### Auditing
+
+**Purpose:** Track and restrict changes to sensitive data for accountability.
+
+#### Example: Audit Student Table Changes
+
+```sql
+CREATE OR REPLACE TRIGGER audit_students_changes
+AFTER UPDATE OR DELETE ON Students
+FOR EACH ROW
+BEGIN
+    INSERT INTO AuditLog (action, student_id, change_date)
+    VALUES (CASE 
+               WHEN DELETING THEN 'DELETE'
+               ELSE 'UPDATE' 
+            END, :OLD.student_id, SYSDATE);
+END;
+/
+```
+
 ### Scope and Limitations
 Scope:
 
@@ -483,7 +503,7 @@ Cursors process complex operations row by row.
 Functions and packages improve reusability and modularity.
 Auditing enhances security by tracking changes.
 
-##Limitations:
+## Limitations:
 
 Triggers can introduce performance overhead during bulk operations.
 Cursors are less efficient compared to set-based operations.
@@ -492,7 +512,7 @@ Complex auditing may require additional storage and processing.
 Documentation and Demonstration for Academic Records Management System (ARMS)
 Report
 
-###. Problem Statement and Rationale
+### Problem Statement and Rationale
 The Academic Records Management System (ARMS) handles sensitive student data, requiring advanced database programming techniques to ensure accurate, secure, and efficient operations. To meet these requirements:
 
 Triggers: Enforce business rules, such as ensuring valid enrollment statuses and data consistency.
@@ -501,7 +521,7 @@ Functions: Encapsulate logic for tasks like GPA calculation, enhancing code modu
 Packages: Organize related procedures and functions for better maintainability and reusability.
 Auditing: Track and restrict changes to sensitive data, ensuring transparency and accountability.
 
-###2. Implementation Details
+### Implementation Details
 a) Triggers
 Purpose: Automatically enforce business rules and maintain data integrity when specific database actions occur.
 Use Cases:
@@ -530,7 +550,7 @@ Tracking changes to sensitive fields like grades or enrollment status.
 Logging user actions for later review and accountability.
 Restricting data access based on user roles.
 
-###Demonstration
+### Demonstration
 1. Triggers in Action
 Demonstrate how inserting or updating a student with invalid enrollment status is prevented.
 Show triggers that log changes to grades or student details into the audit table.
