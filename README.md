@@ -563,4 +563,3 @@ Highlight the use of packages to streamline operations, such as adding new stude
 5. Audit Logs
 Show audit logs capturing actions like grade changes or sensitive data updates.
 Demonstrate how role-based restrictions ensure only authorized users can modify specific records.
-
